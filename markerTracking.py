@@ -3,21 +3,29 @@ import numpy as np
 from pupil_apriltags import Detector
 import csv
 from datetime import datetime
+import socket
+import json
+import time
+
+# UDP hedef bilgileri
+UDP_IP = "10.10.50.79"  # Unity çalışıyorsa localhost, değilse Unity IP adresi
+UDP_PORT = 12345
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # Kalibrasyon parametrelerini yükle
 with np.load("calib_params.npz") as data:
     camera_matrix = data["camera_matrix"]
     dist_coeffs = data["dist_coeffs"]
 
-# --- AprilTag ayarları ---
-tag_size = 0.0375 # Metre cinsinden (örneğin: 5 cm)
+tag_size = 0.0375 # Metre cinsinden
 
-# CSV dosyasını hazırla
 csv_file = open('apriltag_log.csv', mode='w', newline='')
 csv_writer = csv.writer(csv_file)
 csv_writer.writerow(['Time', 'ID', 'Tx', 'Ty', 'Tz',
-                     'R00', 'R01', 'R02', 'R10', 'R11', 'R12', 'R20', 'R21', 'R22','BetaX','BetaY','BetaZ','AlphaX','AlphaY','AlphaZ'])
-# AprilTag detector oluştur
+                     'R00', 'R01', 'R02', 'R10', 'R11', 'R12', 'R20', 'R21', 'R22',
+                     'BetaX','BetaY','BetaZ','AlphaX','AlphaY','AlphaZ'])
+
 detector = Detector(families="tag36h11",
                     nthreads=1,
                     quad_decimate=1,
@@ -26,7 +34,7 @@ detector = Detector(families="tag36h11",
                     decode_sharpening=0.25,
                     debug=0)
 
-cap = cv2.VideoCapture(1,cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
 
 while True:
     ret, frame = cap.read()
@@ -34,68 +42,38 @@ while True:
         break
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    #AprilTag detection
+
     tags = detector.detect(gray, estimate_tag_pose=True,
                            camera_params=[camera_matrix[0, 0], camera_matrix[1, 1], camera_matrix[0, 2], camera_matrix[1, 2]],
                            tag_size=tag_size)
 
     for tag in tags:
-        # Çerçeve çiz
-        for idx in range(4):
-            pt1 = tuple(map(int, tag.corners[idx]))
-            pt2 = tuple(map(int, tag.corners[(idx + 1) % 4]))
-            cv2.line(frame, pt1, pt2, (0, 255, 0), 2)
-
-        # Poz tahmini (OpenCV uyumlu hale getir)
         rmat = tag.pose_R
         tvec = tag.pose_t.reshape(3)
 
-        # Örnek veri/ Finds the beta point as getting the alpha point 
-        P_local = np.array([0.0, 1, 1])  # Marker'a göre 1cm sağ, 2cm yukarı bir nokta, bunu hololens'in konumuna göre ayarlamak gerekiyor.
-        R = rmat                        # 3x3 rotasyon matrisi
-        T = tvec              # 3x1 translation vektörü
+        P_local = np.array([0.0, 1, 1])  # Marker göreceli nokta
+        P_global = rmat @ P_local + tvec
 
-        # Küresel koordinatta noktanın yeri
-        P_global = R @ P_local + T
-
-        print("Global (kamera) sistemine göre nokta:", P_global)
-        cv2.putText(frame, f"Beta Point: {P_global}", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-        cv2.putText(frame, f"Alpha Point: {P_local}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-
-        # X, Y, Z eksenlerini çiz
-        rvec, _ = cv2.Rodrigues(rmat)
-        tvec_cv = tvec.reshape(3, 1)
-        cv2.drawFrameAxes(frame, camera_matrix, dist_coeffs, rvec, tvec_cv, 0.03)
-
-        print(f"Tag ID: {tag.tag_id}, tag.pose_t: {tag.pose_t}, tag.pose_R: {tag.pose_R}")
-        # OpenCV için dönüştür (Rodrigues formatı gerekiyor)
-
-        rvec_cv, _ = cv2.Rodrigues(rvec)
-        tvec_cv = tvec.reshape(3, 1)
-        # Print the Tz to window on cv2
-        cv2.putText(frame, f"Tz: {tvec[2]}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)   
-
-
-        # Koordinat sistemini çiz
-        cv2.drawFrameAxes(frame, camera_matrix, dist_coeffs, rvec_cv, tvec_cv, 0.03)
-        # Tarih + Zaman
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
-        # CSV'ye yaz
         row = [timestamp, tag.tag_id] + list(tvec) + list(rmat.flatten()) + list(P_global) + list(P_local)
         csv_writer.writerow(row)
 
-        # unity tarafına gönderilecek veri:
+        # Rotation matrix'i düzleştir
+        rotation_matrix_flat = rmat.flatten().tolist()
+
         tag_data = {
             "timestamp": timestamp,
             "id": int(tag.tag_id),
             "translation": tvec.tolist(),
-            "rotation_matrix": rmat.tolist(),
+            "rotation_matrix_flat": rotation_matrix_flat,
             "beta_point": P_global.tolist(),
             "alpha_point": P_local.tolist()
         }
 
-        # ID yaz
+        message = json.dumps(tag_data)
+        sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
+
         center = tuple(map(int, tag.center))
         cv2.putText(frame, f'ID: {tag.tag_id}', center, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
@@ -107,4 +85,3 @@ while True:
 cap.release()
 csv_file.close()
 cv2.destroyAllWindows()
-
