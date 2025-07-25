@@ -6,7 +6,7 @@ from datetime import datetime
 import socket
 import json
 import time
-
+from scipy.spatial.transform import Rotation as R
 # UDP hedef bilgileri
 UDP_IP = "10.10.50.79"  # Unity çalışıyorsa localhost, değilse Unity IP adresi
 UDP_PORT = 12345
@@ -34,7 +34,7 @@ detector = Detector(families="tag36h11",
                     decode_sharpening=0.25,
                     debug=0)
 
-cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 while True:
     ret, frame = cap.read()
@@ -51,26 +51,27 @@ while True:
         rmat = tag.pose_R
         tvec = tag.pose_t.reshape(3)
 
-        P_local = np.array([0.0, 1, 1])  # Marker göreceli nokta
-        P_global = rmat @ P_local + tvec
-
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
-        row = [timestamp, tag.tag_id] + list(tvec) + list(rmat.flatten()) + list(P_global) + list(P_local)
+        row = [timestamp, tag.tag_id] + list(tvec) + list(rmat.flatten())
         csv_writer.writerow(row)
-
+        # Bu matrisi quaterniona çevir
+        r = R.from_matrix(rmat)
+        quat = r.as_quat()  # X, Y, Z, W formatında döner
+        print("Quaternion (x, y, z, w):", quat)
         # Rotation matrix'i düzleştir
-        rotation_matrix_flat = rmat.flatten().tolist()
+        #rotation_matrix_flat = rmat.flatten().tolist()
+        print(f"Shape of quaternion: {quat.shape}")
 
         tag_data = {
             "timestamp": timestamp,
             "id": int(tag.tag_id),
             "translation": tvec.tolist(),
-            "rotation_matrix_flat": rotation_matrix_flat,
-            "beta_point": P_global.tolist(),
-            "alpha_point": P_local.tolist()
+            "quaternion": quat.tolist(),
+            #"rotation_matrix_flat": rotation_matrix_flat,
         }
-
+        print("--------------------------------")
+        print(f"tag_data: {tag_data}")
         message = json.dumps(tag_data)
         sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
 
