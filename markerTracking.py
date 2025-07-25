@@ -63,17 +63,12 @@ while True:
         axis_length = 0.03  # metre cinsinden eksen uzunluğu
         cv2.drawFrameAxes(frame, camera_matrix, dist_coeffs, rvec, tvec, axis_length)
 
-        P_local = np.array([0.0, 1, 1])  # Marker göreceli nokta
-        P_global = rmat @ P_local + tvec
 
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
-        row = [timestamp, tag.tag_id] + list(tvec) + list(rmat.flatten()) + list(P_global) + list(P_local)
+        row = [timestamp, tag.tag_id] + list(tvec) + list(rmat.flatten())
         csv_writer.writerow(row)
 
-        # Rotation matrix'i düzleştir
-        rotation_matrix_flat = rmat.flatten().tolist()
-        print(quat)
         quat*= [-1,1,-1,1]
         tvec *= [1, -1, 1]  # Unity için uygun hale getirme
         tag_data = {
@@ -81,9 +76,6 @@ while True:
             "id": int(tag.tag_id),
             "translation": tvec.tolist(),
             "quaternion": quat.tolist(),
-            "rotation_matrix_flat": rotation_matrix_flat,
-            "beta_point": P_global.tolist(),
-            "alpha_point": P_local.tolist()
         }
 
         message = json.dumps(tag_data)
