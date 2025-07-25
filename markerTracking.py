@@ -7,8 +7,9 @@ import socket
 import json
 import time
 from scipy.spatial.transform import Rotation as R
+
 # UDP hedef bilgileri
-UDP_IP = "10.10.50.79"  # Unity çalışıyorsa localhost, değilse Unity IP adresi
+UDP_IP = "127.0.0.1"  # Unity çalışıyorsa localhost, değilse Unity IP adresi
 UDP_PORT = 12345
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -48,32 +49,46 @@ while True:
                            tag_size=tag_size)
 
     for tag in tags:
+
         rmat = tag.pose_R
         tvec = tag.pose_t.reshape(3)
 
+        r = R.from_matrix(rmat)
+        quat = r.as_quat()  # [x, y, z, w]
+
+        # Dönüş matrisini rotasyon vektörüne çevir
+        rvec, _ = cv2.Rodrigues(rmat)
+
+        # AprilTag koordinat eksenlerini çiz (X: kırmızı, Y: yeşil, Z: mavi)
+        axis_length = 0.03  # metre cinsinden eksen uzunluğu
+        cv2.drawFrameAxes(frame, camera_matrix, dist_coeffs, rvec, tvec, axis_length)
+
+        P_local = np.array([0.0, 1, 1])  # Marker göreceli nokta
+        P_global = rmat @ P_local + tvec
+
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
-        row = [timestamp, tag.tag_id] + list(tvec) + list(rmat.flatten())
+        row = [timestamp, tag.tag_id] + list(tvec) + list(rmat.flatten()) + list(P_global) + list(P_local)
         csv_writer.writerow(row)
-        # Bu matrisi quaterniona çevir
-        r = R.from_matrix(rmat)
-        quat = r.as_quat()  # X, Y, Z, W formatında döner
-        print("Quaternion (x, y, z, w):", quat)
-        # Rotation matrix'i düzleştir
-        #rotation_matrix_flat = rmat.flatten().tolist()
-        print(f"Shape of quaternion: {quat.shape}")
 
+        # Rotation matrix'i düzleştir
+        rotation_matrix_flat = rmat.flatten().tolist()
+        print(quat)
+        quat*= [-1,1,-1,1]
+        tvec *= [1, -1, 1]  # Unity için uygun hale getirme
         tag_data = {
             "timestamp": timestamp,
             "id": int(tag.tag_id),
             "translation": tvec.tolist(),
             "quaternion": quat.tolist(),
-            #"rotation_matrix_flat": rotation_matrix_flat,
+            "rotation_matrix_flat": rotation_matrix_flat,
+            "beta_point": P_global.tolist(),
+            "alpha_point": P_local.tolist()
         }
-        print("--------------------------------")
-        print(f"tag_data: {tag_data}")
+
         message = json.dumps(tag_data)
         sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
+        #print(f"UDP gönderildi: ID={tag.tag_id}, Zaman={timestamp}") 
 
         center = tuple(map(int, tag.center))
         cv2.putText(frame, f'ID: {tag.tag_id}', center, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
