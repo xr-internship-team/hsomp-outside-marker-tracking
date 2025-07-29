@@ -5,7 +5,6 @@ import csv
 from datetime import datetime
 import socket
 import json
-import time
 from scipy.spatial.transform import Rotation as R
 
 # UDP hedef bilgileri
@@ -35,7 +34,7 @@ detector = Detector(families="tag36h11",
                     decode_sharpening=0.25,
                     debug=0)
 
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
 
 while True:
     ret, frame = cap.read()
@@ -69,13 +68,13 @@ while True:
         row = [timestamp, tag.tag_id] + list(tvec) + list(rmat.flatten())
         csv_writer.writerow(row)
 
-        quat*= [-1,1,-1,1]
+        quat*= [1,-1,1,1]
         tvec *= [1, -1, 1]  # Unity için uygun hale getirme
         tag_data = {
             "timestamp": timestamp,
             "id": int(tag.tag_id),
-            "translation": tvec.tolist(),
-            "quaternion": quat.tolist(),
+            "positionDif": tvec.tolist(),
+            "rotationDif": quat.tolist(),
         }
 
         message = json.dumps(tag_data)
