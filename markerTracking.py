@@ -31,6 +31,10 @@ csv_writer.writerow(['Time', 'ID', 'Tx', 'Ty', 'Tz',
                      'R00', 'R01', 'R02', 'R10', 'R11', 'R12', 'R20', 'R21', 'R22',
                      'BetaX','BetaY','BetaZ','AlphaX','AlphaY','AlphaZ', 'DecisionMargin', 'Confidence', 'RScale'])
 
+debug_log = open("debug_frame_log.csv", "w", newline='')
+debug_writer = csv.writer(debug_log)
+debug_writer.writerow(["Time", "TagID", "PosX", "PosY", "PosZ", "QuatX", "QuatY", "QuatZ", "QuatW"])
+
 detector = Detector(families="tag36h11",
                     nthreads=1,
                     quad_decimate=1,
@@ -104,6 +108,11 @@ while True:
         # Unity için dönüşüm (X ve Z eksenleri düzeltildi)
         unity_quat = current_quat * [-1, -1, -1, 1]  # X, Y, Z bileşenleri çevrildi
         unity_pos = current_pos * [1, 1, 1]        # X, Y, Z eksenleri çevrildi
+        debug_writer.writerow([
+            timestamp, tag.tag_id,
+            unity_pos[0], unity_pos[1], unity_pos[2],
+            unity_quat[0], unity_quat[1], unity_quat[2], unity_quat[3]
+        ])
         
         tag_data = {
             "timestamp": timestamp,
@@ -186,6 +195,7 @@ while True:
 cap.release()
 csv_file.close()
 cv2.destroyAllWindows()
+debug_log.close()
 
 # Final istatistikler
 if len(decision_margins) > 0:
