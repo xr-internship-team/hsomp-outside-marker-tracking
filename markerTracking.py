@@ -33,7 +33,7 @@ csv_writer.writerow(['Time', 'ID', 'Tx', 'Ty', 'Tz',
 
 debug_log = open("debug_frame_log.csv", "w", newline='')
 debug_writer = csv.writer(debug_log)
-debug_writer.writerow(["Time", "TagID", "PosX", "PosY", "PosZ", "QuatX", "QuatY", "QuatZ", "QuatW"])
+debug_writer.writerow(["Time", "TagID", "PosX", "PosY", "PosZ", "Distance", "QuatX", "QuatY", "QuatZ", "QuatW"])
 
 detector = Detector(families="tag36h11",
                     nthreads=1,
@@ -108,9 +108,11 @@ while True:
         # Unity için dönüşüm (X ve Z eksenleri düzeltildi)
         unity_quat = current_quat * [-1, -1, -1, 1]  # X, Y, Z bileşenleri çevrildi
         unity_pos = current_pos * [1, 1, 1]        # X, Y, Z eksenleri çevrildi
+        distance =  np.linalg.norm(unity_pos)
         debug_writer.writerow([
             timestamp, tag.tag_id,
             unity_pos[0], unity_pos[1], unity_pos[2],
+            distance,
             unity_quat[0], unity_quat[1], unity_quat[2], unity_quat[3]
         ])
         
