@@ -9,6 +9,9 @@ import time
 from scipy.spatial.transform import Rotation as R
 from kalmanFilter import PoseKalmanFilter
 
+
+
+
 # UDP hedef bilgileri
 UDP_IP = "192.168.137.185"  # Unity çalışıyorsa localhost, değilse Unity IP adresi
 UDP_PORT = 12345
@@ -43,7 +46,7 @@ detector = Detector(families="tag36h11",
                     decode_sharpening=0.25,
                     debug=0)
 
-cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
 
 # Her tag ID için ayrı Kalman filtresi sakla
 filters = {}
