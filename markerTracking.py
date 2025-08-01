@@ -10,7 +10,7 @@ from scipy.spatial.transform import Rotation as R
 from kalmanFilter import PoseKalmanFilter
 
 # UDP hedef bilgileri
-UDP_IP = "192.168.137.185"  # Unity çalışıyorsa localhost, değilse Unity IP adresi
+UDP_IP = "192.168.137.21"  # Unity çalışıyorsa localhost, değilse Unity IP adresi
 UDP_PORT = 12345
 
 # Configuration for Unity data transmission
@@ -101,9 +101,14 @@ while True:
         row = [timestamp, tag.tag_id] + list(tvec) + list(rmat.flatten()) + [decision_margin, confidence, r_scale]
         csv_writer.writerow(row)
 
+        # HoloLens Y offset compensation (HoloLens is 0.107414m above tripod marker)
+        # Apply in camera coordinate system where measurement was made
+        compensated_pos = current_pos.copy()
+        compensated_pos[1] += 0.107414/2  # Add offset for HoloLens height above tripod
+        
         # Unity için dönüşüm (X ve Z eksenleri düzeltildi)
         unity_quat = current_quat * [-1, -1, -1, 1]  # X, Y, Z bileşenleri çevrildi
-        unity_pos = current_pos * [1, 1, 1]        # X, Y, Z eksenleri çevrildi
+        unity_pos = compensated_pos * [1, 1, 1]        # X, Y, Z eksenleri çevrildi
         
         tag_data = {
             "timestamp": timestamp,
@@ -124,7 +129,7 @@ while True:
         # Görselleştirme
         center = tuple(map(int, tag.center))
         cv2.putText(frame, f'ID: {tag_id}', center, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-        cv2.putText(frame, f'Pos: {current_pos[0]:.2f}, {current_pos[1]:.2f}, {current_pos[2]:.2f}', 
+        cv2.putText(frame, f'Pos: {compensated_pos[0]:.2f}, {compensated_pos[1]:.2f}, {compensated_pos[2]:.2f}', 
                     (center[0], center[1] + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
         # Confidence ve decision margin bilgilerini göster
