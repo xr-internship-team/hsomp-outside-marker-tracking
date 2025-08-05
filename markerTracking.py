@@ -10,7 +10,7 @@ from scipy.spatial.transform import Rotation as R
 from kalmanFilter import PoseKalmanFilter
 
 # UDP hedef bilgileri
-UDP_IP = "192.168.137.21"  # Unity çalışıyorsa localhost, değilse Unity IP adresi
+UDP_IP = "10.10.50.63"  # Unity çalışıyorsa localhost, değilse Unity IP adresi
 UDP_PORT = 12345
 
 # Configuration for Unity data transmission
@@ -95,7 +95,7 @@ while True:
         axis_length = 0.03
         cv2.drawFrameAxes(frame, camera_matrix, dist_coeffs, rvec, current_pos, axis_length)
 
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        timestamp = time.time()
 
         # CSV'ye yaz (hem ham hem işlenmiş veri + confidence bilgileri)
         row = [timestamp, tag.tag_id] + list(tvec) + list(rmat.flatten()) + [decision_margin, confidence, r_scale]
@@ -163,7 +163,7 @@ while True:
     cv2.imshow("AprilTag Tracker", frame)
 
     key = cv2.waitKey(1)
-    if key == 27:  # ESC
+    if key == 27 or cv2.getWindowProperty("AprilTag Tracker", cv2.WND_PROP_VISIBLE) < 1:  # ESC
         break
     elif key == ord('f') or key == ord('F'):  # F tuşu ile filtreyi aç/kapa
         use_filter = not use_filter
