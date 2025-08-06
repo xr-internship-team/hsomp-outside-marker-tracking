@@ -10,7 +10,7 @@ from scipy.spatial.transform import Rotation as R
 from kalmanFilter import PoseKalmanFilter
 
 # UDP hedef bilgileri
-UDP_IP = "192.168.137.21"  # Unity çalışıyorsa localhost, değilse Unity IP adresi
+UDP_IP = "127.0.0.1"  # Unity çalışıyorsa localhost, değilse Unity IP adresi
 UDP_PORT = 12345
 
 # Configuration for Unity data transmission
@@ -95,8 +95,8 @@ while True:
         axis_length = 0.03
         cv2.drawFrameAxes(frame, camera_matrix, dist_coeffs, rvec, current_pos, axis_length)
 
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
+        timestamp = time.time()
         # CSV'ye yaz (hem ham hem işlenmiş veri + confidence bilgileri)
         row = [timestamp, tag.tag_id] + list(tvec) + list(rmat.flatten()) + [decision_margin, confidence, r_scale]
         csv_writer.writerow(row)
@@ -116,11 +116,7 @@ while True:
             "positionDif": unity_pos.tolist(),
             "rotationDif": unity_quat.tolist()
         }
-        
-        # Optionally add confidence data for Unity
-        if SEND_CONFIDENCE_TO_UNITY:
-            tag_data["confidence"] = float(confidence) if confidence is not None else None
-            tag_data["decision_margin"] = float(decision_margin)
+
 
         message = json.dumps(tag_data)
         sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
