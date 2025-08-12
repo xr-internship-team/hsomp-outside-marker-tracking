@@ -65,7 +65,7 @@ python markerTracking.py
    - Send results via UDP to the HoloLens  
 
 <p align="center">
-  <img src="assets/demo_video.gif" alt="Demo" width="600"/>
+  <img src="assets/video_demo.gif" alt="Demo" width="600"/>
 </p>
 
 ## 🔗 Related Repository
