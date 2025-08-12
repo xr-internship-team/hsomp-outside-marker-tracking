@@ -4,8 +4,6 @@ This repository is part of the **HSOMP (Holographic Stabilization with Outside M
 It is responsible for **tracking a marker (QR code) with an external camera**, estimating the HoloLens 2 position and rotation, and sending this data to the HoloLens via **UDP**.  
 This solution improves hologram stability in situations where **SLAM** and **IMU** sensors of the HoloLens fail or produce inaccurate results.
 
-
-
 ## 📌 Problem
 When the HoloLens 2 is used in moving platforms (e.g., vehicles, tanks), **IMU sensor drift** can occur.  
 If SLAM algorithms also fail, holograms begin to drift and lose alignment.  
@@ -66,10 +64,13 @@ python markerTracking.py
    - Apply Kalman filtering  
    - Send results via UDP to the HoloLens  
 
+<p align="center">
+  <img src="assets/marker_tracker_video.gif" alt="Demo" width="600"/>
+</p>
+
 ## 🔗 Related Repository
 For the Unity + MRTK application that runs on HoloLens 2 and receives the tracking data sent from this system, please see the related repository:
 [HSOMP Holographic Visualizer](https://github.com/xr-internship-team/hsomp-holographic-visualizer)
-
 
 ## 📜 License
 This project is licensed under the terms specified in the repository.
