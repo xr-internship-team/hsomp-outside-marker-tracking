@@ -1,6 +1,6 @@
 # HSOMP Outside Marker Tracking
 
-This repository is part of the **HSOMP (Holographic Stabilization with Outside Marker Positioning)** project.  
+This repository is part of the **HSOMP (Hologram Stability on Moving Platform)** project.  
 It is responsible for **tracking a marker (QR code) with an external camera**, estimating the HoloLens 2 position and rotation, and sending this data to the HoloLens via **UDP**.  
 This solution improves hologram stability in situations where **SLAM** and **IMU** sensors of the HoloLens fail or produce inaccurate results.
 
