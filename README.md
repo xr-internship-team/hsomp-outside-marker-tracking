@@ -8,6 +8,11 @@ This solution improves hologram stability in situations where **SLAM** and **IMU
 When the HoloLens 2 is used in moving platforms (e.g., vehicles, tanks), **IMU sensor drift** can occur.  
 If SLAM algorithms also fail, holograms begin to drift and lose alignment.  
 This module solves the problem by using an **external camera** to read a marker placed on the HoloLens and determine its exact position and rotation.
+<p align="center">
+  <img src="assets/HLwithTagOnIt.jpeg" alt="Hololens 2 with QR" width="400"/>
+    <br>
+  <em>Microsoft Hololens 2 with a QR for external tracking.</em>
+</p>
 
 ## 🚀 Features
 - **AprilTag (marker) detection** from an external camera feed  
