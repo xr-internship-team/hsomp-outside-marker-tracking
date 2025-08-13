@@ -52,7 +52,8 @@ graph = TagGraph(root_id=FRONT_TAG_ID, ema_alpha=EMA_ALPHA)
 
 # Varsa eski extrinsics’i graf’a tohumla
 loaded_extr = seed_graph_from_extrinsics(graph, EXTRINSICS_FILE)
-
+pair_max  = None 
+cycle_max = None
 while True:
     ret, frame = cap.read()
     if not ret: break
@@ -71,11 +72,9 @@ while True:
         center= rd["center"]
 
         # SENİN KOMPANZASYONUN
-        tvec_comp = tvec.copy()
-        tvec_comp[1] += HOLOLENS_Y_COMP
-
-        # T_c_t
+        tvec_comp = tvec.copy()  # BURADA EKLEME YOK
         T_c_t = rt_to_T(rmat, tvec_comp)
+
         detections[tid] = {
             "T_c_t": T_c_t,
             "dm": dm,
@@ -96,12 +95,23 @@ while True:
 
     # ---- 4) Head pozu: reach edilebilen tag’lerden füzyon + Kalman ----
     fused = fuse_head_pose(detections, graph, use_filter=use_filter)
+    
     if fused is not None:
         fused_pos, fused_quat, confidence, r_scale, used_ids, avg_dm = fused
 
         # Unity’ye gönder (senin işaret konv.)
-        unity_pos  = fused_pos * [1,1,1]
-        unity_quat = fused_quat * [-1,-1,-1,1]
+        # ---- OpenCV(x,+y↓,z) --> Unity(x,+y↑,z) dönüşümü ----
+        # 1) ÇIKIŞTA Y-ofset uygula
+        p = fused_pos + np.array([0.0, HOLOLENS_Y_COMP, 0.0])
+        # 2) Eksen flip matrisi (y'yi ters çevir)
+        F = np.diag([1.0, -1.0, 1.0])
+        # 3) Pozisyon dönüşümü
+        unity_pos = (F @ p)
+        # 4) Oryantasyon dönüşümü: R_u = F * R_cv * F
+        R_cv = R.from_quat(fused_quat).as_matrix()
+        R_u  = F @ R_cv @ F
+        unity_quat = R.from_matrix(R_u).as_quat()
+
         udp.send({
             "timestamp": time.time(),
             "id": -1,
@@ -171,6 +181,12 @@ while True:
             json.dump(extr, f, indent=2)
     elif key in [ord('l'), ord('L')]:
         seed_graph_from_extrinsics(graph, EXTRINSICS_FILE)
+    elif key in [ord('v'), ord('V')]:
+        # TagGraph'ın mevcut halini 3D olarak görselleştir
+        try:
+            graph.visualize_graph()
+        except Exception as e:
+            print(f"Görselleştirme hatası: {e}")
 
 # ----------------- Cleanup -----------------
 cap.release()

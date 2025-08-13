@@ -10,6 +10,38 @@ class TagGraph:
         self.edges = {}   # (a,b) -> T_a_b (4x4)
         # kök -> kök = I
         self.edges[(self.root, self.root)] = np.eye(4)
+    def visualize_graph(self):
+        """
+        Tüm node'ların köke göre pozisyon ve oryantasyonunu 3D olarak çizer.
+        """
+        import matplotlib.pyplot as plt
+        from mpl_toolkits.mplot3d import Axes3D
+        from .transforms import decompose_T
+        from scipy.spatial.transform import Rotation as R
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        plotted = set()
+        for key in self.edges:
+            node_id = key[1]
+            if node_id in plotted:
+                continue
+            T = self.T_root_to(node_id)
+            if T is not None:
+                Rm, t = decompose_T(T)
+                quat = R.from_matrix(Rm).as_quat()
+                # Pozisyonu çiz
+                ax.scatter(t[0], t[1], t[2], label=f'Node {node_id}')
+                # Oryantasyon oku çiz (x ekseni)
+                x_axis = Rm[:,0] * 0.03  # 3cm uzunlukta ok
+                ax.quiver(t[0], t[1], t[2], x_axis[0], x_axis[1], x_axis[2], color='r')
+                plotted.add(node_id)
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        ax.legend()
+        ax.set_title('TagGraph Node Positions and Orientations')
+        plt.show()
 
     def _ema_edge(self, a, b, T_new):
         key = (int(a), int(b))

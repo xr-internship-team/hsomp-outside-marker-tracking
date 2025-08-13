@@ -13,35 +13,56 @@ class PTagDetector:
         )
 
     def detect_with_per_id_size(self, gray, tag_sizes: dict):
-        """
-        Senin akışın:
-        1) Once default tag_size ile detect (pose'lu)
-        2) Her ID için gerçek boyla tekrar detect edip pozları al
-        """
-        base = self.detector.detect(
-            gray, estimate_tag_pose=True,
-            camera_params=[self.fx, self.fy, self.cx, self.cy],
-            tag_size=0.08
-        )
-        out = []
-        for d in base:
-            tid = int(d.tag_id)
-            tsz = float(tag_sizes.get(tid, 0.08))
-            det_list = self.detector.detect(
-                gray, estimate_tag_pose=True,
-                camera_params=[self.fx, self.fy, self.cx, self.cy],
-                tag_size=tsz
-            )
-            dd = next((t for t in det_list if int(t.tag_id) == tid), None)
-            if dd is None:
-                continue
-            rmat = project_to_SO3(dd.pose_R)
-            tvec = dd.pose_t.reshape(3)
-            out.append({
-                "id": tid,
-                "rmat": rmat,
-                "tvec": tvec,
-                "dm": float(dd.decision_margin),
-                "center": tuple(map(int, dd.center))
-            })
-        return out
+       """
+       - Eğer tüm etiketler aynı boyda ise: TEK detect çağrısı.
+       - Eğer farklı boylar varsa: benzersiz boy başına TEK detect çağrısı.
+       Sonuçlar tek listede birleştirilir.
+       """
+       out = []
+       if not tag_sizes:
+           return out
+       # Boy -> bu boyu kullanan ID'ler
+       size_to_ids = {}
+       for tid, sz in tag_sizes.items():
+           size_to_ids.setdefault(float(sz), set()).add(int(tid))
+
+       def _run_detect(tag_size):
+           return self.detector.detect(
+               gray, estimate_tag_pose=True,
+               camera_params=(self.fx, self.fy, self.cx, self.cy),
+               tag_size=float(tag_size)
+           )
+
+       unique_sizes = list(size_to_ids.keys())
+       if len(unique_sizes) == 1:
+           det_list = _run_detect(unique_sizes[0])
+           for d in det_list:
+               tid = int(d.tag_id)
+               if tid not in size_to_ids[unique_sizes[0]]:
+                   continue
+               rmat = project_to_SO3(d.pose_R)
+               tvec = d.pose_t.reshape(3)
+               out.append({
+                   "id": tid,
+                   "rmat": rmat,
+                   "tvec": tvec,
+                   "dm": float(d.decision_margin),
+                   "center": tuple(map(int, d.center))
+               })
+       else:
+           for sz, valid_ids in size_to_ids.items():
+               det_list = _run_detect(sz)
+               for d in det_list:
+                   tid = int(d.tag_id)
+                   if tid not in valid_ids:
+                       continue
+                   rmat = project_to_SO3(d.pose_R)
+                   tvec = d.pose_t.reshape(3)
+                   out.append({
+                       "id": tid,
+                       "rmat": rmat,
+                       "tvec": tvec,
+                       "dm": float(d.decision_margin),
+                       "center": tuple(map(int, d.center))
+                   })
+       return out
