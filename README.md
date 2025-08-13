@@ -65,7 +65,9 @@ python markerTracking.py
    - Send results via UDP to the HoloLens  
 
 <p align="center">
-  <img src="assets/video_demo.gif" alt="Demo" width="600"/>
+  <img src="assets/video_demo.gif" alt="demo_video" width="600"/>
+    <br>
+  <em>Real-time AprilTag marker detection and position/rotation estimation, with Kalman filtering for smoothing.</em>
 </p>
 
 ## 🔗 Related Repository
