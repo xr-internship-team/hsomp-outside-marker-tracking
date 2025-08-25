@@ -157,7 +157,7 @@ while True:
     cv2.imshow("AprilTag Tracker", frame)
 
     key = cv2.waitKey(1)
-    if key == 27:  # ESC
+    if key == 27 or cv2.getWindowProperty("AprilTag Tracker", cv2.WND_PROP_VISIBLE) < 1:  # ESC
         break
     elif key == ord('f') or key == ord('F'):  # Toggle filter with F key
         use_filter = not use_filter
