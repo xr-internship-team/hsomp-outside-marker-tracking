@@ -193,10 +193,17 @@ while True:
         cv2.drawFrameAxes(frame, camera_matrix, dist_coeffs, rvec_draw, compensated_pos_cv, axis_length)
 
         timestamp = time.time()
-
+        if roll>0:
+            roll=180-roll
+        else :
+            roll = -(180+roll)
+        if yaw>0:
+            yaw=180-yaw
+        else :
+            yaw = -(180+yaw)
         # CSV (R: CV uzayı; açı: ENGINE Euler)
         row = [timestamp, tag_id] + list(current_pos_cv) + list(R_cv_filt.flatten()) + \
-              [roll, pitch, yaw, roll, pitch, yaw, decision_margin, confidence, r_scale]
+              [yaw, pitch, roll, yaw, pitch, roll, decision_margin, confidence, r_scale]
         csv_writer.writerow(row)
 
         # UDP gönder

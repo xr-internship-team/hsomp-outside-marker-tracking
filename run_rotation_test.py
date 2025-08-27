@@ -24,6 +24,7 @@ print("\n▶️ HeadPose testi başlatılıyor...")
 process_hp = subprocess.Popen(["python", "markerTracking.py"])
 time.sleep(10)
 process_hp.terminate()
+process_hp.wait()
 print("⏹️ HeadPose tamamlandı.")
 
 # === AprilTag çalıştır
@@ -31,6 +32,7 @@ print("\n▶️ AprilTag testi başlatılıyor...")
 process_april = subprocess.Popen(["python", "markerTracking_apriltag.py"])
 time.sleep(10)
 process_april.terminate()
+process_april.wait()
 print("⏹️ AprilTag tamamlandı.")
 
 # === Logları hedef klasöre taşı

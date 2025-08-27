@@ -23,18 +23,18 @@
 </nav>
 
 <h1 id="overview">Pose Analiz Raporu</h1>
-<div class="callout">Oluşturulma: 2025-08-27 10:48:26 — Klasör: <code>pose_report</code></div>
+<div class="callout">Oluşturulma: 2025-08-27 11:16:24 — Klasör: <code>pose_report</code></div>
 
 <h2 id="insights">Kısa Çıkarımlar</h2>
 <ul>
-<li>- **FPS (medyan)**: FaceMesh (≈9.4%) daha yüksek.</li>
-<li>- **Frame jitter (std, ms)**: AprilTag (≈22.7%) daha stabil.</li>
-<li>- **Δt 95p (ms)**: AprilTag (≈9.2%) daha iyi p95 aralığı.</li>
-<li>- **Orientasyon jitter (RMS, °)**: AprilTag (≈13.9%) daha düşük açısal gürültü.</li>
-<li>- **Translasyon jitter (RMS, mm)**: AprilTag (≈93.0%) daha düşük konumsal gürültü.</li>
-<li>- **Relock medyan (ms)**: FaceMesh (≈100.0%) daha hızlı yeniden yakalıyor.</li>
-<li>- **Drift (mm, °)**: AprilTag (≈92.1%) / AprilTag (≈95.4%) daha az sürüklenme.</li>
-<li>- **DecisionMargin ort.**: FaceMesh (≈123.2%) daha yüksek güven.</li>
+<li>- **FPS (medyan)**: FaceMesh (≈0.9%) daha yüksek.</li>
+<li>- **Frame jitter (std, ms)**: AprilTag (≈29.2%) daha stabil.</li>
+<li>- **Δt 95p (ms)**: AprilTag (≈0.6%) daha iyi p95 aralığı.</li>
+<li>- **Orientasyon jitter (RMS, °)**: AprilTag (≈5.4%) daha düşük açısal gürültü.</li>
+<li>- **Translasyon jitter (RMS, mm)**: AprilTag (≈65.4%) daha düşük konumsal gürültü.</li>
+<li>- **Relock medyan (ms)**: FaceMesh (≈8.9%) daha hızlı yeniden yakalıyor.</li>
+<li>- **Drift (mm, °)**: AprilTag (≈29.3%) / AprilTag (≈68.4%) daha az sürüklenme.</li>
+<li>- **DecisionMargin ort.**: FaceMesh (≈72.9%) daha yüksek güven.</li>
 </ul>
 
 <h2 id="tables">Tablolar</h2>
@@ -59,29 +59,29 @@
   <tbody>
     <tr>
       <td>AprilTag</td>
-      <td>28.563</td>
-      <td>5.391</td>
-      <td>42.978</td>
-      <td>0.517</td>
-      <td>0.337</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>3.098</td>
-      <td>0.418</td>
-      <td>39.009</td>
+      <td>30.933</td>
+      <td>19.968</td>
+      <td>47.080</td>
+      <td>1.724</td>
+      <td>2.680</td>
+      <td>479.250</td>
+      <td>525.809</td>
+      <td>71.348</td>
+      <td>7.524</td>
+      <td>48.709</td>
     </tr>
     <tr>
       <td>FaceMesh</td>
-      <td>31.245</td>
-      <td>6.976</td>
-      <td>47.313</td>
-      <td>0.601</td>
-      <td>4.785</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>39.329</td>
-      <td>9.122</td>
-      <td>87.062</td>
+      <td>31.217</td>
+      <td>28.213</td>
+      <td>47.386</td>
+      <td>1.821</td>
+      <td>7.735</td>
+      <td>436.465</td>
+      <td>2081.209</td>
+      <td>100.982</td>
+      <td>23.775</td>
+      <td>84.224</td>
     </tr>
   </tbody>
 </table>
@@ -118,48 +118,48 @@
     <tr>
       <td>AprilTag</td>
       <td>0</td>
-      <td>28.563</td>
-      <td>10.251</td>
-      <td>36.651</td>
-      <td>5.391</td>
-      <td>42.978</td>
-      <td>1</td>
-      <td>10.094</td>
-      <td>0.0</td>
-      <td>0</td>
-      <td>0.0</td>
-      <td>0.517</td>
-      <td>0.861</td>
-      <td>0.337</td>
-      <td>0.613</td>
-      <td>3.098</td>
-      <td>0.418</td>
-      <td>39.009</td>
-      <td>35.708</td>
-      <td>40.495</td>
+      <td>30.933</td>
+      <td>1.883</td>
+      <td>43.224</td>
+      <td>19.968</td>
+      <td>47.080</td>
+      <td>3</td>
+      <td>12.067</td>
+      <td>525.809</td>
+      <td>2</td>
+      <td>479.250</td>
+      <td>1.724</td>
+      <td>2.892</td>
+      <td>2.680</td>
+      <td>5.153</td>
+      <td>71.348</td>
+      <td>7.524</td>
+      <td>48.709</td>
+      <td>39.005</td>
+      <td>54.398</td>
     </tr>
     <tr>
       <td>FaceMesh</td>
       <td>0</td>
-      <td>31.245</td>
-      <td>9.384</td>
-      <td>55.571</td>
-      <td>6.976</td>
-      <td>47.313</td>
-      <td>1</td>
-      <td>12.391</td>
-      <td>0.0</td>
-      <td>0</td>
-      <td>0.0</td>
-      <td>0.601</td>
-      <td>1.065</td>
-      <td>4.785</td>
-      <td>9.236</td>
-      <td>39.329</td>
-      <td>9.122</td>
-      <td>87.062</td>
-      <td>81.449</td>
-      <td>91.680</td>
+      <td>31.217</td>
+      <td>0.413</td>
+      <td>inf</td>
+      <td>28.213</td>
+      <td>47.386</td>
+      <td>6</td>
+      <td>47.431</td>
+      <td>2081.209</td>
+      <td>5</td>
+      <td>436.465</td>
+      <td>1.821</td>
+      <td>4.205</td>
+      <td>7.735</td>
+      <td>12.000</td>
+      <td>100.982</td>
+      <td>23.775</td>
+      <td>84.224</td>
+      <td>58.032</td>
+      <td>105.824</td>
     </tr>
   </tbody>
 </table>

@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-test_dirs = ["distance_0.5m", "distance_1.0m", "distance_1.5m", "distance_2.0m"]
+test_dirs = ["rotation_60deg"]
 
 for test in test_dirs:
     headpose_path = os.path.join("tests", test, "headpose_log.csv")

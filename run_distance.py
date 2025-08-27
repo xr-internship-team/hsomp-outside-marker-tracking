@@ -18,18 +18,21 @@ for log_file in ["headpose_log.csv", "apriltag_log.csv"]:
         os.remove(log_file)
         print(f"🧹 Eski log silindi: {log_file}")
 
-# === HeadPose çalıştır
+# HeadPose çalıştır
 print("\n▶️ HeadPose testi başlatılıyor...")
 process_hp = subprocess.Popen(["python", "markerTracking.py"])
 time.sleep(10)
 process_hp.terminate()
+process_hp.wait()  # Bekle ki dosya düzgün kapansın
 print("⏹️ HeadPose tamamlandı.")
+
 
 # === AprilTag çalıştır
 print("\n▶️ AprilTag testi başlatılıyor...")
 process_april = subprocess.Popen(["python", "markerTracking_apriltag.py"])
 time.sleep(10)
 process_april.terminate()
+process_april.wait()
 print("⏹️ AprilTag tamamlandı.")
 
 # === Logları hedef klasöre taşı
