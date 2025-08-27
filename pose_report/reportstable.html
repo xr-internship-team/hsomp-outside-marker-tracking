@@ -1,0 +1,214 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Pose Dashboard</title>
+<style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:24px}
+    h1,h2,h3{margin:8px 0}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .section{margin:22px 0}
+    .table{border-collapse:collapse;width:100%}
+    .table th,.table td{border:1px solid #ddd;padding:6px 8px}
+    .table thead{background:#f2f2f2}
+    .img{margin:10px 0}
+    img{max-width:100%;height:auto;border:1px solid #eee;padding:4px}
+    .callout{background:#f9f9f9;border-left:4px solid #aaa;padding:8px 12px;margin:10px 0}
+    nav a{margin-right:12px}
+    </style></head>
+<body>
+<nav>
+  <a href="#overview">Özet</a>
+  <a href="#insights">Çıkarımlar</a>
+  <a href="#tables">Tablolar</a>
+  <a href="#figs">Grafikler</a>
+  <a href="#docs">Metrix Sözlüğü</a>
+</nav>
+
+<h1 id="overview">Pose Analiz Raporu</h1>
+<div class="callout">Oluşturulma: 2025-08-27 10:48:26 — Klasör: <code>pose_report</code></div>
+
+<h2 id="insights">Kısa Çıkarımlar</h2>
+<ul>
+<li>- **FPS (medyan)**: FaceMesh (≈9.4%) daha yüksek.</li>
+<li>- **Frame jitter (std, ms)**: AprilTag (≈22.7%) daha stabil.</li>
+<li>- **Δt 95p (ms)**: AprilTag (≈9.2%) daha iyi p95 aralığı.</li>
+<li>- **Orientasyon jitter (RMS, °)**: AprilTag (≈13.9%) daha düşük açısal gürültü.</li>
+<li>- **Translasyon jitter (RMS, mm)**: AprilTag (≈93.0%) daha düşük konumsal gürültü.</li>
+<li>- **Relock medyan (ms)**: FaceMesh (≈100.0%) daha hızlı yeniden yakalıyor.</li>
+<li>- **Drift (mm, °)**: AprilTag (≈92.1%) / AprilTag (≈95.4%) daha az sürüklenme.</li>
+<li>- **DecisionMargin ort.**: FaceMesh (≈123.2%) daha yüksek güven.</li>
+</ul>
+
+<h2 id="tables">Tablolar</h2>
+<div class="section">
+  <h3>Algoritma Bazında Özet</h3>
+  <table class="dataframe table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>algo</th>
+      <th>fps_med</th>
+      <th>jitter_ms</th>
+      <th>dt_ms_p95</th>
+      <th>ang_jitter_deg_rms</th>
+      <th>trans_jitter_mm_rms</th>
+      <th>relock_p50_ms</th>
+      <th>p95_gap_ms</th>
+      <th>drift_pos_mm</th>
+      <th>drift_ang_deg</th>
+      <th>dm_mean</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AprilTag</td>
+      <td>28.563</td>
+      <td>5.391</td>
+      <td>42.978</td>
+      <td>0.517</td>
+      <td>0.337</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3.098</td>
+      <td>0.418</td>
+      <td>39.009</td>
+    </tr>
+    <tr>
+      <td>FaceMesh</td>
+      <td>31.245</td>
+      <td>6.976</td>
+      <td>47.313</td>
+      <td>0.601</td>
+      <td>4.785</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>39.329</td>
+      <td>9.122</td>
+      <td>87.062</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="section">
+  <h3>(Algo, ID) Bazında</h3>
+  <table class="dataframe table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>algo</th>
+      <th>ID</th>
+      <th>fps_med</th>
+      <th>fps_min</th>
+      <th>fps_max</th>
+      <th>jitter_ms</th>
+      <th>dt_ms_p95</th>
+      <th>n_segments</th>
+      <th>mean_seg_s</th>
+      <th>p95_gap_ms</th>
+      <th>n_gaps</th>
+      <th>relock_p50_ms</th>
+      <th>ang_jitter_deg_rms</th>
+      <th>ang_deg_p95</th>
+      <th>trans_jitter_mm_rms</th>
+      <th>trans_mm_p95</th>
+      <th>drift_pos_mm</th>
+      <th>drift_ang_deg</th>
+      <th>dm_mean</th>
+      <th>dm_p05</th>
+      <th>dm_p95</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AprilTag</td>
+      <td>0</td>
+      <td>28.563</td>
+      <td>10.251</td>
+      <td>36.651</td>
+      <td>5.391</td>
+      <td>42.978</td>
+      <td>1</td>
+      <td>10.094</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.517</td>
+      <td>0.861</td>
+      <td>0.337</td>
+      <td>0.613</td>
+      <td>3.098</td>
+      <td>0.418</td>
+      <td>39.009</td>
+      <td>35.708</td>
+      <td>40.495</td>
+    </tr>
+    <tr>
+      <td>FaceMesh</td>
+      <td>0</td>
+      <td>31.245</td>
+      <td>9.384</td>
+      <td>55.571</td>
+      <td>6.976</td>
+      <td>47.313</td>
+      <td>1</td>
+      <td>12.391</td>
+      <td>0.0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.601</td>
+      <td>1.065</td>
+      <td>4.785</td>
+      <td>9.236</td>
+      <td>39.329</td>
+      <td>9.122</td>
+      <td>87.062</td>
+      <td>81.449</td>
+      <td>91.680</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="figs">Grafikler</h2>
+<div class="grid">
+<div class="img"><img src="figs/AprilTag_dt_hist.png" alt="AprilTag_dt_hist.png"/></div>
+<div class="img"><img src="figs/AprilTag_dt_series.png" alt="AprilTag_dt_series.png"/></div>
+<div class="img"><img src="figs/AprilTag_dm_hist.png" alt="AprilTag_dm_hist.png"/></div>
+<div class="img"><img src="figs/AprilTag_dm_series.png" alt="AprilTag_dm_series.png"/></div>
+<div class="img"><img src="figs/AprilTag_ang_hist.png" alt="AprilTag_ang_hist.png"/></div>
+<div class="img"><img src="figs/AprilTag_ang_series.png" alt="AprilTag_ang_series.png"/></div>
+<div class="img"><img src="figs/AprilTag_dpos_hist.png" alt="AprilTag_dpos_hist.png"/></div>
+<div class="img"><img src="figs/AprilTag_dpos_series.png" alt="AprilTag_dpos_series.png"/></div>
+<div class="img"><img src="figs/FaceMesh_dt_hist.png" alt="FaceMesh_dt_hist.png"/></div>
+<div class="img"><img src="figs/FaceMesh_dt_series.png" alt="FaceMesh_dt_series.png"/></div>
+<div class="img"><img src="figs/FaceMesh_dm_hist.png" alt="FaceMesh_dm_hist.png"/></div>
+<div class="img"><img src="figs/FaceMesh_dm_series.png" alt="FaceMesh_dm_series.png"/></div>
+<div class="img"><img src="figs/FaceMesh_ang_hist.png" alt="FaceMesh_ang_hist.png"/></div>
+<div class="img"><img src="figs/FaceMesh_ang_series.png" alt="FaceMesh_ang_series.png"/></div>
+<div class="img"><img src="figs/FaceMesh_dpos_hist.png" alt="FaceMesh_dpos_hist.png"/></div>
+<div class="img"><img src="figs/FaceMesh_dpos_series.png" alt="FaceMesh_dpos_series.png"/></div>
+<div class="img"><img src="figs/algo_fps_med.png" alt="algo_fps_med.png"/></div>
+<div class="img"><img src="figs/algo_jitter.png" alt="algo_jitter.png"/></div>
+<div class="img"><img src="figs/algo_dt95.png" alt="algo_dt95.png"/></div>
+<div class="img"><img src="figs/algo_angjit.png" alt="algo_angjit.png"/></div>
+<div class="img"><img src="figs/algo_transjit.png" alt="algo_transjit.png"/></div>
+<div class="img"><img src="figs/algo_relock.png" alt="algo_relock.png"/></div>
+<div class="img"><img src="figs/algo_gap95.png" alt="algo_gap95.png"/></div>
+<div class="img"><img src="figs/algo_drift_pos.png" alt="algo_drift_pos.png"/></div>
+<div class="img"><img src="figs/algo_drift_ang.png" alt="algo_drift_ang.png"/></div>
+<div class="img"><img src="figs/algo_dm_mean.png" alt="algo_dm_mean.png"/></div>
+</div>
+
+<h2 id="docs">Açıklamalar</h2>
+<div class="section">
+<h3>Metrix Sözlüğü</h3>
+<ul>
+<li><b>FPS (medyan)</b>: Sistemin sürdürülebilir kare işleme hızı. Yüksek olması akıcılık açısından iyidir.</li>
+<li><b>Frame jitter (ms)</b>: Kareler arası sürelerin standart sapması. Düşük olması stabil zamanlama demektir.</li>
+<li><b>Δt p95 (ms)</b>: Kareler arası sürenin 95. yüzdelik değeri. Kuyruktaki gecikmeleri temsil eder; düşük olması iyidir.</li>
+<li><b>Orientation jitter (RMS, °)</b>: Ardışık pozlar arasındaki açısal değişimin RMS’i. Düşükse rotasyon gürültüsü azdır.</li>
+<li><b>Translation jitter (RMS, mm)</b>: Ardışık pozlar arasındaki konum değişiminin RMS’i. Düşükse poz gürültüsü azdır.</li>
+<li><b>Relock median (ms)</b>: Takip kaybı sonrası yeniden yakalama sürelerinin medyanı. Düşükse daha hızlı toparlıyor.</li>
+<li><b>p95 gap (ms)</b>: Takip kesintilerinin 95. yüzdelik süresi. Düşükse uzun kopmalar azdır.</li>
+<li><b>Drift (mm, °)</b>: Sekans başı ve sonu ortalamaları arasındaki fark (konum ve açı). Düşükse uzun süre stabil demektir.</li>
+<li><b>DecisionMargin</b>: Algoritmanın iç güven puanı (ölçeksiz). Yüksekse daha emin demektir.</li>
+</ul>
+</div>
+
+</body></html>
