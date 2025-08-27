@@ -1,0 +1,5 @@
+Versiyon,Kamera,Filtre,FPS Ort.,Tz Std Sapma,DM Ort.,DM Std
+HeadPose,0,ON,31.18,0.0469,97.88,15.66
+AprilTag,0,ON,30.7,0.03,63.15,9.51
+HeadPose,0,OFF,31.18,0.0469,97.88,15.66
+AprilTag,0,OFF,30.7,0.03,63.15,9.51

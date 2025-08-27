@@ -75,7 +75,7 @@ with np.load("calib_params.npz") as data:
 tag_size = 0.08  # (akış korunması için)
 
 # CSV
-csv_file = open('apriltag_log.csv', mode='w', newline='')
+csv_file = open('headpose_log.csv', mode='w', newline='')
 csv_writer = csv.writer(csv_file)
 csv_writer.writerow(['Time', 'ID', 'Tx', 'Ty', 'Tz',
                      'R00', 'R01', 'R02', 'R10', 'R11', 'R12', 'R20', 'R21', 'R22',
