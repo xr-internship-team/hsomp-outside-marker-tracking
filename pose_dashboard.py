@@ -8,6 +8,7 @@ Usage:
 Options:
     --out pose_report     : output directory
     --gap-ms 200          : gap threshold to split segments and compute relock stats
+    --dm-threshold 1.0    : DecisionMargin threshold for supported head-rotation range (new)
 
 Input CSV columns (as per your logger):
 ['Time','ID','Tx','Ty','Tz',
@@ -187,8 +188,76 @@ def aggregate_per_algo(df: pd.DataFrame, gap_s: float) -> pd.DataFrame:
     return pd.DataFrame(agg)
 
 # ----------------------
+# Supported rotation range (NEW)
+# ----------------------
+
+def calculate_angle_range(min_angle: float, max_angle: float) -> float:
+    """Açı aralığını wrap-around (döngü) durumuna göre hesaplar.
+    Varsayım: açı aralığı [-180, 180] üzerinde.
+    """
+    if np.isnan(min_angle) or np.isnan(max_angle):
+        return np.nan
+    normal_range = max_angle - min_angle
+    if normal_range > 180:  # wrap-around var
+        return (180 - abs(min_angle)) + (180 - abs(max_angle))
+    else:
+        return normal_range
+
+SUPPORT_AXES = ["BetaX", "BetaY", "BetaZ"]
+
+def compute_supported_head_rotation_ranges(df: pd.DataFrame, dm_threshold: float = 1.0):
+    """Return two dataframes:
+    - ranges_df: columns [algo, axis, min_deg, max_deg, range_deg, threshold]
+    - fail_df  : columns [algo, axis, min_fail_deg, max_fail_deg, threshold]
+    Skips gracefully if required columns missing.
+    """
+    needed = set(["DecisionMargin"]) | set(SUPPORT_AXES)
+    if any(col not in df.columns for col in needed):
+        return pd.DataFrame(columns=["algo","axis","min_deg","max_deg","range_deg","threshold"]), \
+               pd.DataFrame(columns=["algo","axis","min_fail_deg","max_fail_deg","threshold"])    
+
+    # Ensure numeric
+    work = df.copy()
+    work['DecisionMargin'] = pd.to_numeric(work['DecisionMargin'], errors='coerce')
+    for a in SUPPORT_AXES:
+        work[a] = pd.to_numeric(work[a], errors='coerce')
+
+    rows = []
+    fails = []
+    for algo, g in work.groupby('algo'):
+        reliable = g[g['DecisionMargin'] > dm_threshold]
+        unstable = g[g['DecisionMargin'] <= dm_threshold]
+        for axis in SUPPORT_AXES:
+            if axis not in g.columns:
+                continue
+            if not reliable.empty:
+                min_angle = float(reliable[axis].min())
+                max_angle = float(reliable[axis].max())
+                full_range = float(calculate_angle_range(min_angle, max_angle))
+                rows.append({
+                    'algo': algo,
+                    'axis': axis,
+                    'min_deg': round(min_angle, 2),
+                    'max_deg': round(max_angle, 2),
+                    'range_deg': round(full_range, 2),
+                    'threshold': float(dm_threshold)
+                })
+            if not unstable.empty:
+                fails.append({
+                    'algo': algo,
+                    'axis': axis,
+                    'min_fail_deg': round(float(unstable[axis].min()), 2),
+                    'max_fail_deg': round(float(unstable[axis].max()), 2),
+                    'threshold': float(dm_threshold)
+                })
+    ranges_df = pd.DataFrame(rows)
+    fail_df = pd.DataFrame(fails)
+    return ranges_df, fail_df
+
+# ----------------------
 # Plotting
 # ----------------------
+
 def plot_hist(data, title, xlabel, out_path: Path):
     if len(data) == 0: return None
     plt.figure()
@@ -217,10 +286,11 @@ def generate_figures(df: pd.DataFrame, figs_dir: Path) -> list:
             if p: paths.append(p)
         if 'DecisionMargin' in g.columns:
             dm = pd.to_numeric(g['DecisionMargin'], errors='coerce').dropna().to_numpy()
-            p = plot_hist(dm, f"{algo} DecisionMargin", "DM", figs_dir / f"{algo}_dm_hist.png")
-            if p: paths.append(p)
-            p = plot_line(t[:len(dm)], dm, f"{algo} DecisionMargin over time", "time (s)", "DM", figs_dir / f"{algo}_dm_series.png")
-            if p: paths.append(p)
+            if len(dm):
+                p = plot_hist(dm, f"{algo} DecisionMargin", "DM", figs_dir / f"{algo}_dm_hist.png")
+                if p: paths.append(p)
+                p = plot_line(t[:len(dm)], dm, f"{algo} DecisionMargin over time", "time (s)", "DM", figs_dir / f"{algo}_dm_series.png")
+                if p: paths.append(p)
         R_list = [rotation_matrix_from_row(row) for _, row in g.iterrows()]
         if len(R_list) > 1:
             ang = [angular_diff_deg(R_list[i-1], R_list[i]) for i in range(1, len(R_list))]
@@ -245,9 +315,23 @@ def bar_compare(agg_df: pd.DataFrame, metric: str, out_path: Path, title: str, y
     plt.tight_layout(); plt.savefig(out_path); plt.close()
     return out_path
 
+# NEW: bar charts for supported range per axis
+
+def bar_supported_ranges(ranges_df: pd.DataFrame, axis: str, out_path: Path):
+    if ranges_df.empty: return None
+    g = ranges_df[ranges_df['axis'] == axis]
+    if g.empty: return None
+    plt.figure()
+    plt.bar(g['algo'], g['range_deg'])
+    plt.title(f"Supported Range for {axis} (DM > {g['threshold'].iloc[0]:g})")
+    plt.ylabel("Degrees")
+    plt.tight_layout(); plt.savefig(out_path); plt.close()
+    return out_path
+
 # ----------------------
 # Auto insights
 # ----------------------
+
 def who_is_better(agg_df: pd.DataFrame, metric: str, lower_better: bool) -> str:
     if agg_df.shape[0] < 2 or metric not in agg_df.columns:
         return "n/a"
@@ -290,17 +374,38 @@ METRIC_DOC = """
 <li><b>p95 gap (ms)</b>: Takip kesintilerinin 95. yüzdelik süresi. Düşükse uzun kopmalar azdır.</li>
 <li><b>Drift (mm, °)</b>: Sekans başı ve sonu ortalamaları arasındaki fark (konum ve açı). Düşükse uzun süre stabil demektir.</li>
 <li><b>DecisionMargin</b>: Algoritmanın iç güven puanı (ölçeksiz). Yüksekse daha emin demektir.</li>
+<li><b>Desteklenen Baş Rotasyon Aralığı</b>: DM eşik değeri üzerindeki karelerde eksen başına (BetaX/Y/Z) görülen min-maks açı aralığı. Wrap-around dikkate alınır; aralık ne kadar genişse izlenebilir açı penceresi o kadar iyidir.</li>
 </ul>
 """
 
 def df_to_html(df: pd.DataFrame) -> str:
+    if df is None or len(df) == 0:
+        return '<em>veri yok</em>'
     return df.round(3).to_html(index=False, border=0, classes="table")
 
-def html_report(out_dir: Path, per_group: pd.DataFrame, agg_df: pd.DataFrame, figs: list[Path]) -> Path:
+
+def html_report(out_dir: Path,
+                per_group: pd.DataFrame,
+                agg_df: pd.DataFrame,
+                figs: list[Path],
+                ranges_df: pd.DataFrame | None = None,
+                fail_df: pd.DataFrame | None = None) -> Path:
     html_path = out_dir / "reportstable.html"
     when = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     imgs_html = "\n".join([f'<div class="img"><img src="figs/{p.name}" alt="{p.name}"/></div>' for p in figs])
     insights = "\n".join([f"<li>{s}</li>" for s in insight_paragraphs(agg_df)])
+
+    # Pretty tables for rotation ranges
+    ranges_tbl = None
+    fail_tbl = None
+    if ranges_df is not None and not ranges_df.empty:
+        # pivot to algo x axis with range + min/max
+        piv = ranges_df.pivot_table(index=['algo'], columns='axis', values='range_deg')
+        piv = piv.reset_index()
+        ranges_tbl = df_to_html(piv.rename_axis(None, axis=1))
+    if fail_df is not None and not fail_df.empty:
+        fail_tbl = df_to_html(fail_df)
+
     css = """
     body{font-family:Arial,Helvetica,sans-serif;margin:24px}
     h1,h2,h3{margin:8px 0}
@@ -322,6 +427,7 @@ def html_report(out_dir: Path, per_group: pd.DataFrame, agg_df: pd.DataFrame, fi
   <a href="#overview">Özet</a>
   <a href="#insights">Çıkarımlar</a>
   <a href="#tables">Tablolar</a>
+  <a href="#range">Açı Aralığı</a>
   <a href="#figs">Grafikler</a>
   <a href="#docs">Metrix Sözlüğü</a>
 </nav>
@@ -344,6 +450,16 @@ def html_report(out_dir: Path, per_group: pd.DataFrame, agg_df: pd.DataFrame, fi
   {df_to_html(per_group)}
 </div>
 
+<h2 id="range">Desteklenen Baş Rotasyon Aralığı (DM &gt;= eşik)</h2>
+<div class="section">
+  <div class="callout">Bu bölüm, DecisionMargin &gt;= eşiği için BetaX/BetaY/BetaZ eksenlerinde gözlenen min–maks aralıktan wrap-around dikkate alınarak hesaplanan toplam açı aralığını raporlar.</div>
+  {ranges_tbl if ranges_tbl else '<em>Gerekli sütunlar (DecisionMargin, BetaX/Y/Z) bulunamadı ya da veri yok.</em>'}
+</div>
+<div class="section">
+  <h3>DM &lt; eşik için başarısızlık bölgeleri (isteğe bağlı)</h3>
+  {fail_tbl if fail_tbl else '<em>Başarısızlık verisi yok.</em>'}
+</div>
+
 <h2 id="figs">Grafikler</h2>
 <div class="grid">
 {imgs_html}
@@ -359,12 +475,14 @@ def html_report(out_dir: Path, per_group: pd.DataFrame, agg_df: pd.DataFrame, fi
 # ----------------------
 # Main
 # ----------------------
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--facemesh", type=str, help="FaceMesh CSV")
     ap.add_argument("--apriltag", type=str, help="AprilTag CSV")
     ap.add_argument("--out", type=str, default="pose_report", help="Output directory")
     ap.add_argument("--gap-ms", type=float, default=200.0, help="Gap threshold (ms)")
+    ap.add_argument("--dm-threshold", type=float, default=1.0, help="DecisionMargin eşiği (desteklenen açı aralığı için)")
     args = ap.parse_args()
 
     out_dir = Path(args.out)
@@ -386,6 +504,7 @@ def main():
     agg_df = aggregate_per_algo(df, gap_s)
 
     # Save tables (csv) for reference
+    out_dir.mkdir(parents=True, exist_ok=True)
     per_group.to_csv(out_dir/"summary_metrics.csv", index=False)
     agg_df.to_csv(out_dir/"summary_metrics_aggregated.csv", index=False)
 
@@ -409,8 +528,20 @@ def main():
         p = bar_compare(agg_df, metric, figs_dir / fname, title, ylabel)
         if p: fig_list.append(p)
 
-    # HTML report
-    report_path = html_report(out_dir, per_group, agg_df, fig_list)
+    # --- NEW: Supported-head-rotation range calculations + charts ---
+    ranges_df, fail_df = compute_supported_head_rotation_ranges(df, dm_threshold=args.dm_threshold)
+    if not ranges_df.empty:
+        ranges_df.to_csv(out_dir/"supported_rotation_ranges.csv", index=False)
+    if not fail_df.empty:
+        fail_df.to_csv(out_dir/"supported_rotation_fail_zones.csv", index=False)
+
+    # Create per-axis comparison bar charts
+    for axis in SUPPORT_AXES:
+        p = bar_supported_ranges(ranges_df, axis, figs_dir / f"supported_range_{axis}.png")
+        if p: fig_list.append(p)
+
+    # HTML report (now includes the new tables)
+    report_path = html_report(out_dir, per_group, agg_df, fig_list, ranges_df, fail_df)
 
     # Minimal console info
     print(f"Report generated: {report_path}")

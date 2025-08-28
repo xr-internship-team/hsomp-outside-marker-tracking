@@ -18,23 +18,24 @@
   <a href="#overview">Özet</a>
   <a href="#insights">Çıkarımlar</a>
   <a href="#tables">Tablolar</a>
+  <a href="#range">Açı Aralığı</a>
   <a href="#figs">Grafikler</a>
   <a href="#docs">Metrix Sözlüğü</a>
 </nav>
 
 <h1 id="overview">Pose Analiz Raporu</h1>
-<div class="callout">Oluşturulma: 2025-08-27 11:16:24 — Klasör: <code>pose_report</code></div>
+<div class="callout">Oluşturulma: 2025-08-27 15:48:33 — Klasör: <code>pose_report</code></div>
 
 <h2 id="insights">Kısa Çıkarımlar</h2>
 <ul>
-<li>- **FPS (medyan)**: FaceMesh (≈0.9%) daha yüksek.</li>
-<li>- **Frame jitter (std, ms)**: AprilTag (≈29.2%) daha stabil.</li>
+<li>- **FPS (medyan)**: AprilTag (≈0.1%) daha yüksek.</li>
+<li>- **Frame jitter (std, ms)**: FaceMesh (≈79.4%) daha stabil.</li>
 <li>- **Δt 95p (ms)**: AprilTag (≈0.6%) daha iyi p95 aralığı.</li>
-<li>- **Orientasyon jitter (RMS, °)**: AprilTag (≈5.4%) daha düşük açısal gürültü.</li>
-<li>- **Translasyon jitter (RMS, mm)**: AprilTag (≈65.4%) daha düşük konumsal gürültü.</li>
-<li>- **Relock medyan (ms)**: FaceMesh (≈8.9%) daha hızlı yeniden yakalıyor.</li>
-<li>- **Drift (mm, °)**: AprilTag (≈29.3%) / AprilTag (≈68.4%) daha az sürüklenme.</li>
-<li>- **DecisionMargin ort.**: FaceMesh (≈72.9%) daha yüksek güven.</li>
+<li>- **Orientasyon jitter (RMS, °)**: AprilTag (≈33.3%) daha düşük açısal gürültü.</li>
+<li>- **Translasyon jitter (RMS, mm)**: AprilTag (≈80.7%) daha düşük konumsal gürültü.</li>
+<li>- **Relock medyan (ms)**: FaceMesh (≈87.5%) daha hızlı yeniden yakalıyor.</li>
+<li>- **Drift (mm, °)**: AprilTag (≈21.7%) / FaceMesh (≈42.6%) daha az sürüklenme.</li>
+<li>- **DecisionMargin ort.**: FaceMesh (≈62.4%) daha yüksek güven.</li>
 </ul>
 
 <h2 id="tables">Tablolar</h2>
@@ -59,29 +60,29 @@
   <tbody>
     <tr>
       <td>AprilTag</td>
-      <td>30.933</td>
-      <td>19.968</td>
-      <td>47.080</td>
-      <td>1.724</td>
-      <td>2.680</td>
-      <td>479.250</td>
-      <td>525.809</td>
-      <td>71.348</td>
-      <td>7.524</td>
-      <td>48.709</td>
+      <td>31.152</td>
+      <td>332.529</td>
+      <td>47.962</td>
+      <td>4.792</td>
+      <td>23.710</td>
+      <td>2215.989</td>
+      <td>6242.419</td>
+      <td>89.660</td>
+      <td>22.185</td>
+      <td>69.510</td>
     </tr>
     <tr>
       <td>FaceMesh</td>
-      <td>31.217</td>
-      <td>28.213</td>
-      <td>47.386</td>
-      <td>1.821</td>
-      <td>7.735</td>
-      <td>436.465</td>
-      <td>2081.209</td>
-      <td>100.982</td>
-      <td>23.775</td>
-      <td>84.224</td>
+      <td>31.133</td>
+      <td>68.635</td>
+      <td>48.232</td>
+      <td>7.187</td>
+      <td>123.031</td>
+      <td>275.921</td>
+      <td>1720.285</td>
+      <td>114.462</td>
+      <td>12.744</td>
+      <td>112.912</td>
     </tr>
   </tbody>
 </table>
@@ -118,51 +119,84 @@
     <tr>
       <td>AprilTag</td>
       <td>0</td>
-      <td>30.933</td>
-      <td>1.883</td>
-      <td>43.224</td>
-      <td>19.968</td>
-      <td>47.080</td>
-      <td>3</td>
-      <td>12.067</td>
-      <td>525.809</td>
-      <td>2</td>
-      <td>479.250</td>
-      <td>1.724</td>
-      <td>2.892</td>
-      <td>2.680</td>
-      <td>5.153</td>
-      <td>71.348</td>
-      <td>7.524</td>
-      <td>48.709</td>
-      <td>39.005</td>
-      <td>54.398</td>
+      <td>31.152</td>
+      <td>0.159</td>
+      <td>45.497</td>
+      <td>332.529</td>
+      <td>47.962</td>
+      <td>11</td>
+      <td>3.427</td>
+      <td>6242.419</td>
+      <td>10</td>
+      <td>2215.989</td>
+      <td>4.792</td>
+      <td>5.203</td>
+      <td>23.710</td>
+      <td>9.904</td>
+      <td>89.660</td>
+      <td>22.185</td>
+      <td>69.510</td>
+      <td>47.345</td>
+      <td>78.437</td>
     </tr>
     <tr>
       <td>FaceMesh</td>
       <td>0</td>
-      <td>31.217</td>
-      <td>0.413</td>
-      <td>inf</td>
-      <td>28.213</td>
-      <td>47.386</td>
-      <td>6</td>
-      <td>47.431</td>
-      <td>2081.209</td>
-      <td>5</td>
-      <td>436.465</td>
-      <td>1.821</td>
-      <td>4.205</td>
-      <td>7.735</td>
-      <td>12.000</td>
-      <td>100.982</td>
-      <td>23.775</td>
-      <td>84.224</td>
-      <td>58.032</td>
-      <td>105.824</td>
+      <td>31.133</td>
+      <td>0.508</td>
+      <td>56.769</td>
+      <td>68.635</td>
+      <td>48.232</td>
+      <td>8</td>
+      <td>5.397</td>
+      <td>1720.285</td>
+      <td>7</td>
+      <td>275.921</td>
+      <td>7.187</td>
+      <td>8.612</td>
+      <td>123.031</td>
+      <td>27.708</td>
+      <td>114.462</td>
+      <td>12.744</td>
+      <td>112.912</td>
+      <td>70.988</td>
+      <td>159.795</td>
     </tr>
   </tbody>
 </table>
+</div>
+
+<h2 id="range">Desteklenen Baş Rotasyon Aralığı (DM &gt;= eşik)</h2>
+<div class="section">
+  <div class="callout">Bu bölüm, DecisionMargin &gt;= eşiği için BetaX/BetaY/BetaZ eksenlerinde gözlenen min–maks aralıktan wrap-around dikkate alınarak hesaplanan toplam açı aralığını raporlar.</div>
+  <table class="dataframe table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>algo</th>
+      <th>BetaX</th>
+      <th>BetaY</th>
+      <th>BetaZ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AprilTag</td>
+      <td>81.38</td>
+      <td>111.93</td>
+      <td>110.25</td>
+    </tr>
+    <tr>
+      <td>FaceMesh</td>
+      <td>121.50</td>
+      <td>125.40</td>
+      <td>14.05</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div class="section">
+  <h3>DM &lt; eşik için başarısızlık bölgeleri (isteğe bağlı)</h3>
+  <em>Başarısızlık verisi yok.</em>
 </div>
 
 <h2 id="figs">Grafikler</h2>
@@ -193,6 +227,9 @@
 <div class="img"><img src="figs/algo_drift_pos.png" alt="algo_drift_pos.png"/></div>
 <div class="img"><img src="figs/algo_drift_ang.png" alt="algo_drift_ang.png"/></div>
 <div class="img"><img src="figs/algo_dm_mean.png" alt="algo_dm_mean.png"/></div>
+<div class="img"><img src="figs/supported_range_BetaX.png" alt="supported_range_BetaX.png"/></div>
+<div class="img"><img src="figs/supported_range_BetaY.png" alt="supported_range_BetaY.png"/></div>
+<div class="img"><img src="figs/supported_range_BetaZ.png" alt="supported_range_BetaZ.png"/></div>
 </div>
 
 <h2 id="docs">Açıklamalar</h2>
@@ -208,6 +245,7 @@
 <li><b>p95 gap (ms)</b>: Takip kesintilerinin 95. yüzdelik süresi. Düşükse uzun kopmalar azdır.</li>
 <li><b>Drift (mm, °)</b>: Sekans başı ve sonu ortalamaları arasındaki fark (konum ve açı). Düşükse uzun süre stabil demektir.</li>
 <li><b>DecisionMargin</b>: Algoritmanın iç güven puanı (ölçeksiz). Yüksekse daha emin demektir.</li>
+<li><b>Desteklenen Baş Rotasyon Aralığı</b>: DM eşik değeri üzerindeki karelerde eksen başına (BetaX/Y/Z) görülen min-maks açı aralığı. Wrap-around dikkate alınır; aralık ne kadar genişse izlenebilir açı penceresi o kadar iyidir.</li>
 </ul>
 </div>
 
