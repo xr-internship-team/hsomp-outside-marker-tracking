@@ -1,9 +1,6 @@
 filterpy==1.4.5
-matplotlib==3.10.5
 mediapipe==0.10.14
 numpy==2.3.2
 opencv_contrib_python==4.12.0.88
 opencv_python==4.12.0.88
-pandas==2.3.2
-pupil_apriltags==1.0.4.post11
 scipy==1.16.1
