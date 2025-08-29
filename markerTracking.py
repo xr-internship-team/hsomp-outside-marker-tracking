@@ -273,7 +273,7 @@ cap.release()
 csv_file.close()
 cv2.destroyAllWindows()
 face_mesh.close()
-
+s
 # Final istatistikler
 if len(decision_margins) > 0:
     print(f"\n=== Final Decision Margin Statistics ===")
