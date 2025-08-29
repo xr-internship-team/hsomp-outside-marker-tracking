@@ -103,3 +103,8 @@ For the Unity + MRTK application that runs on HoloLens 2 and receives the tracki
 ## 📜 License
 
 This project is licensed under the terms specified in the repository.
+
+## 📄 Comparison Report
+
+For a detailed explanation of **why FaceMesh was chosen over AprilTag**, see the following document:  
+[assets/facemesh_vs_apriltag_report.pdf](assets/facemesh_vs_apriltag_report.pdf)

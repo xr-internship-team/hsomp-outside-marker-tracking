@@ -13,7 +13,7 @@ from kalmanFilter import PoseKalmanFilter
 # =========================
 #   ENGINE / EKSEN AYARLARI
 # =========================
-ENGINE = "unity"   # "unity" veya "kanzi"
+ENGINE = "unity"  
 
 def cv_to_engine_RT(R_cv: np.ndarray, t_cv: np.ndarray):
     S = np.diag([1.0, -1.0, 1.0])  # y eksenini tersle
@@ -23,9 +23,6 @@ def cv_to_engine_RT(R_cv: np.ndarray, t_cv: np.ndarray):
 
 def quat_for_engine(R_in: np.ndarray, engine: str):
     q_xyzw = R.from_matrix(R_in).as_quat()  # (x,y,z,w)
-    if engine.lower() == "kanzi":
-        x, y, z, w = q_xyzw
-        return np.array([w, x, y, z])       # wxyz
     return q_xyzw                            # xyzw (Unity)
 
 # =========================
@@ -50,7 +47,6 @@ FACE_IDS = [  # 15 salient facial points
     356, 152, 168, 94, 323, 93,
 ]
 
-# AprilTag-benzeri kapsül
 class FaceTag:
     def __init__(self, tag_id, Rmat, tvec, center, decision_margin):
         self.tag_id = tag_id
@@ -73,13 +69,14 @@ with np.load("calib_params.npz") as data:
     dist_coeffs = data["dist_coeffs"]
 
 tag_size = 0.08  # (akış korunması için)
-
+ENABLE_CSV_LOG=False
 # CSV
-csv_file = open('headpose_log.csv', mode='w', newline='')
-csv_writer = csv.writer(csv_file)
-csv_writer.writerow(['Time', 'ID', 'Tx', 'Ty', 'Tz',
-                     'R00', 'R01', 'R02', 'R10', 'R11', 'R12', 'R20', 'R21', 'R22',
-                     'BetaX','BetaY','BetaZ','AlphaX','AlphaY','AlphaZ', 'DecisionMargin', 'Confidence', 'RScale'])
+if ENABLE_CSV_LOG:
+    csv_file = open('headpose_log.csv', mode='w', newline='')
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(['Time', 'ID', 'Tx', 'Ty', 'Tz',
+                        'R00', 'R01', 'R02', 'R10', 'R11', 'R12', 'R20', 'R21', 'R22',
+                        'BetaX','BetaY','BetaZ','AlphaX','AlphaY','AlphaZ', 'DecisionMargin', 'Confidence', 'RScale'])
 
 # MediaPipe FaceMesh
 mp_face_mesh = mp.solutions.face_mesh
@@ -204,7 +201,8 @@ while True:
         # CSV (R: CV uzayı; açı: ENGINE Euler)
         row = [timestamp, tag_id] + list(current_pos_cv) + list(R_cv_filt.flatten()) + \
               [yaw, pitch, roll, yaw, pitch, roll, decision_margin, confidence, r_scale]
-        csv_writer.writerow(row)
+        if ENABLE_CSV_LOG:
+            csv_writer.writerow(row)
 
         # UDP gönder
         tag_data = {
@@ -269,11 +267,12 @@ while True:
                 filter_obj.set_confidence_params(max_decision_margin=suggested_max)
             print("Parameters updated automatically!")
 
-cap.release()
-csv_file.close()
+cap.release() 
+if ENABLE_CSV_LOG:
+    csv_file.close()
 cv2.destroyAllWindows()
 face_mesh.close()
-s
+
 # Final istatistikler
 if len(decision_margins) > 0:
     print(f"\n=== Final Decision Margin Statistics ===")
