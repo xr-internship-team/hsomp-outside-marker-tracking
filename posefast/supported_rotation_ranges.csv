@@ -1,0 +1,7 @@
+algo,axis,min_deg,max_deg,range_deg,threshold
+AprilTag,BetaX,-4.41,61.0,65.4,1.0
+AprilTag,BetaY,-31.58,45.51,77.09,1.0
+AprilTag,BetaZ,-14.5,22.01,36.51,1.0
+FaceMesh,BetaX,-33.5,48.05,81.56,1.0
+FaceMesh,BetaY,-60.99,44.14,105.13,1.0
+FaceMesh,BetaZ,-22.82,11.6,34.42,1.0
