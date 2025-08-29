@@ -1,83 +1,96 @@
-# HSOMP Outside Marker Tracking
+HSOMP Outside FaceMesh Tracking
 
-This repository is part of the **HSOMP (Hologram Stability on Moving Platform)** project.  
-It is responsible for **tracking a marker (QR code) with an external camera**, estimating the HoloLens 2 position and rotation, and sending this data to the HoloLens via **UDP**.  
-This solution improves hologram stability in situations where **SLAM** and **IMU** sensors of the HoloLens fail or produce inaccurate results.
+This repository is part of the HSOMP (Hologram Stability on Moving Platform) project.
+It is responsible for tracking facial landmarks (MediaPipe FaceMesh) with an external camera, estimating the HoloLens 2 position and rotation, and sending this data to the HoloLens via UDP.
+This solution improves hologram stability in situations where SLAM and IMU sensors of the HoloLens fail or produce inaccurate results.
 
-## 📌 Problem
-When the HoloLens 2 is used in moving platforms (e.g., vehicles, tanks), **IMU sensor drift** can occur.  
-If SLAM algorithms also fail, holograms begin to drift and lose alignment.  
-This module solves the problem by using an **external camera** to read a marker placed on the HoloLens and determine its exact position and rotation.
-<p align="center">
-  <img src="assets/HLwithTagOnIt.jpeg" alt="Hololens 2 with QR" width="400"/>
-    <br>
-  <em>Microsoft Hololens 2 with a QR for external tracking.</em>
-</p>
+📌 Problem
 
-## 🚀 Features
-- **AprilTag (marker) detection** from an external camera feed  
-- **3D position & rotation** estimation  
-- **Adaptive Kalman filter** for smoothing measurements  
-- **UDP data transmission** to the HoloLens  
+When the HoloLens 2 is used on moving platforms (e.g., vehicles, tanks), IMU sensor drift may occur.
+If SLAM algorithms also fail, holograms begin to drift and lose alignment.
+This module solves the problem by using MediaPipe FaceMesh through an external camera to detect facial landmarks and determine the headset’s exact position and rotation.
 
-## 📦 Technologies
-- **Python**
-- **OpenCV**
-- **Adaptive Kalman Filter**
-- **UDP Networking**
-- **AprilTag Tracking**
+<p align="center"> <img src="assets/HLwithFaceMesh.jpeg" alt="Hololens 2 with FaceMesh" width="400"/> <br> <em>Microsoft Hololens 2 tracked with external camera using FaceMesh.</em> </p>
+🚀 Features
 
-## 🔧 Installation
-```bash
-git clone https://github.com/xr-internship-team/hsomp-outside-marker-tracking.git
-```
+MediaPipe FaceMesh facial landmark detection
+
+3D position & rotation estimation
+
+Adaptive Kalman filter for smoothing measurements
+
+UDP data transmission to the HoloLens
+
+📦 Technologies
+
+Python
+
+OpenCV
+
+MediaPipe FaceMesh
+
+Adaptive Kalman Filter
+
+UDP Networking
+
+🔧 Installation
+git clone https://github.com/xr-internship-team/hsomp-outside-facemesh-tracking.git
+
+
 Install dependencies:
-```bash
+
 pip install -r requirements.txt
-```
 
-## 📷 Camera Calibration
+📷 Camera Calibration
 
-Before running the marker tracking script, you need to calibrate your camera and generate a `calib_params.npz` file.
+As with the marker-based version, this system also requires camera calibration. The calibration parameters are stored in a calib_params.npz file.
 
-### Steps:
+Steps:
 
-1. **Print a checkerboard pattern** (e.g., 9x6 inner corners, each square 2.5cm).
-2. **Capture multiple images** of the checkerboard from different angles and distances. Save them in a folder, e.g., `calib_images/`.
-3. **Run the calibration script:**
-   ```bash
-   python calibCamera.py
-   ```
-   This will process all images in `calib_images/`, perform camera calibration, and save the result as `calib_params.npz`.
+Print a checkerboard pattern (e.g., 9x6 inner corners, each square 2.5cm).
 
-4. **Place `calib_params.npz` in your project directory.**
+Capture multiple images of the checkerboard from different angles and distances, and store them in a folder, e.g., calib_images/.
 
-> The marker tracking script will automatically load this file for camera parameters.
+Run the calibration script:
 
-## ▶ Usage
-1. Connect and set up your external camera.  
-2. Place an AprilTag (marker) on the HoloLens 2 headset.  
-3. Run the tracking script:
-```bash
-python markerTracking.py
-```
-(CSV logging can be enabled by setting `ENABLE_CSV_LOG = True` in the script.)
+python calibCamera.py
 
-4. The system will:
-   - Detect the marker  
-   - Estimate position and rotation  
-   - Apply Kalman filtering  
-   - Send results via UDP to the HoloLens  
 
-<p align="center">
-  <img src="assets/video_demo.gif" alt="demo_video" width="600"/>
-    <br>
-  <em>Real-time AprilTag marker detection and position/rotation estimation, with Kalman filtering for smoothing.</em>
-</p>
+This will process all images in calib_images/, perform camera calibration, and save the result as calib_params.npz.
 
-## 🔗 Related Repository
+Place calib_params.npz in your project directory.
+
+The tracking script will automatically load this file for camera parameters.
+
+▶ Usage
+
+Connect and set up your external camera.
+
+Position yourself so that your face (with or without glasses) is visible to the external camera while wearing HoloLens 2.
+
+Run the tracking script:
+
+python facemeshTracking.py
+
+
+(CSV logging can be enabled by setting ENABLE_CSV_LOG = True in the script.)
+
+The system will:
+
+Detect FaceMesh landmarks
+
+Estimate position and rotation
+
+Apply Kalman filtering
+
+Send results via UDP to the HoloLens
+
+<p align="center"> <img src="assets/video_facemesh_with_glasses.gif" alt="facemesh_with_glasses" width="600"/> <br> <em>FaceMesh landmark detection and pose estimation with glasses.</em> </p> <p align="center"> <img src="assets/video_facemesh_without_glasses.gif" alt="facemesh_without_glasses" width="600"/> <br> <em>FaceMesh landmark detection and pose estimation without glasses.</em> </p>
+🔗 Related Repository
+
 For the Unity + MRTK application that runs on HoloLens 2 and receives the tracking data sent from this system, please see the related repository:
-[HSOMP Holographic Visualizer](https://github.com/xr-internship-team/hsomp-holographic-visualizer)
+HSOMP Holographic Visualizer
 
-## 📜 License
+📜 License
+
 This project is licensed under the terms specified in the repository.
