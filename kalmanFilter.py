@@ -287,6 +287,6 @@ class PoseKalmanFilter:
         if min_r_scale is not None:
             self.min_r_scale = min_r_scale
         if max_r_scale is not None:
-            self.max_r_scale = max_r_scale  # Still capped at 3.0 in bounds check
+            self.max_r_scale = max_r_scale
         if alpha is not None:
             self.confidence_alpha = alpha
